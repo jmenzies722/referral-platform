@@ -22,12 +22,16 @@ jobs:
   test-intake:
     name: test (services/intake)
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('services/intake/pyproject.toml') != '' }}
     defaults:
       run:
         working-directory: services/intake
     steps:
       - uses: actions/checkout@v4
+      # hashFiles() is only allowed in step-level conditions, not job-level ones.
+      # Skips cleanly until the service exists.
       - uses: astral-sh/setup-uv@v5
+        if: ${{ hashFiles('services/intake/pyproject.toml') != '' }}
       - run: uv sync --locked
+        if: ${{ hashFiles('services/intake/pyproject.toml') != '' }}
       - run: uv run pytest -q
+        if: ${{ hashFiles('services/intake/pyproject.toml') != '' }}
