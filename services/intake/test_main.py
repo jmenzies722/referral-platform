@@ -1,4 +1,4 @@
-"""Tests for ticket 001. `with TestClient(app)` runs the lifespan (startup/shutdown)."""
+"""Tests for tickets 001-002. `with TestClient(app)` runs the lifespan (startup/shutdown)."""
 
 from fastapi.testclient import TestClient
 
@@ -40,3 +40,24 @@ def test_missing_patient_returns_422():
     with TestClient(app) as client:
         r = client.post("/referrals", json={"specialty": "cardiology"})
     assert r.status_code == 422
+
+
+def test_get_referral_via_location_returns_200():
+    with TestClient(app) as client:
+        created = client.post(
+            "/referrals", json={"patient": "Jane Test", "specialty": "cardiology"}
+        )
+        r = client.get(created.headers["location"])
+    assert r.status_code == 200
+    assert r.json() == {
+        "id": created.json()["id"],
+        "patient": "Jane Test",
+        "specialty": "cardiology",
+    }
+
+
+def test_get_unknown_referral_returns_404():
+    with TestClient(app) as client:
+        r = client.get("/referrals/ref_doesnotexist")
+    assert r.status_code == 404
+    assert r.json() == {"detail": "referral not found"}
