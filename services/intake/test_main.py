@@ -61,3 +61,8 @@ def test_get_unknown_referral_returns_404():
         r = client.get("/referrals/ref_doesnotexist")
     assert r.status_code == 404
     assert r.json() == {"detail": "referral not found"}
+
+
+def test_deliberately_fails():
+    """KAN-3 demo: proves a red CI blocks the merge. Never merge this."""
+    assert 1 + 1 == 3
